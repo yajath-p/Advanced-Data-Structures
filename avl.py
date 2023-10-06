@@ -37,23 +37,23 @@ def height(root: Node) -> int:
 def AVL_balance(root: Node) -> int:
     if(root is None):
         return 0
-    return height(root.rightchild) - height(root.leftchild)
+    return height(root.leftchild) - height(root.rightchild)
 
 def right_rotate(root:Node) -> Node:
     left_child = root.leftchild
-    temp = left_child.rightchild
+    tree = left_child.rightchild
     
     left_child.rightchild = root
-    root.leftchild = temp
+    root.leftchild = tree
 
     return left_child
 
 def left_rotate(root:Node) -> Node:
     right_child = root.rightchild
-    temp = right_child.leftchild
+    tree = right_child.leftchild
     
     right_child.leftchild = root
-    root.rightchild = temp
+    root.rightchild = tree
     return right_child
 
 # insert
@@ -93,7 +93,26 @@ def insert(root: Node, key: int, word: str) -> Node:
 # Then do a preorder traversal of the [key,word] pairs and use this traversal to build a new tree using AVL insertion.
 # Return the root
 def bulkInsert(root: Node, items: List) -> Node:
-    # Fill in.
+    #entering with no balancing
+    for [key,word] in items:
+        root = list_insert(root, key, word)
+    root = preorder_AVL(root)
+    return root
+
+def preorder_AVL(root: Node) -> Node:
+    root = insert(root, root.key, root.word)
+    root.leftchild = preorder_AVL(root.leftchild)
+    root.rightchild = preorder_AVL(root.rightchild)
+    
+    return root
+
+def list_insert(root: Node, key: int, word: str) -> Node:
+    if(root is None):
+        root = Node(key, word, None, None)
+    if(key < root.key):
+        root.leftchild = list_insert(root.leftchild, key, word)
+    elif(key > root.key):
+        root.rightchild = list_insert(root.rightchild, key, word)
     return root
 
 # bulkDelete
@@ -116,23 +135,25 @@ def search(root: Node, search_key: int) -> str:
     return json.dumps(answer_list,indent=2)
 
 def search_helper(root: Node, search_key: int) -> list:
+    if(root is None):
+        return None
     answer = []
+    answer.append(root.key)
+
     if(search_key == root.key):
-        answer.append(root.key)
         answer.append(root.word)
-        return answer
     elif(search_key < root.key):
        answer += search_helper(root.leftchild, search_key)
     elif(search_key > root.key):
        answer += search_helper(root.rightchild, search_key)
-    else:
-        return None
+
+    return answer
 
 # replace
 # For the tree rooted at root, replace the word corresponding to the key search_key by replacement_word.
 # The search_key is guaranteed to be in the tree.
 # Return the root
-def replace(root: Node, search_key: int, replacement_word:str) -> None:
+def replace(root: Node, search_key: int, replacement_word:str) -> Node:
     if(search_key == root.key):
         root.word = replacement_word
         return root
@@ -140,5 +161,5 @@ def replace(root: Node, search_key: int, replacement_word:str) -> None:
         replace(root.leftchild, search_key, replacement_word)
     elif(search_key > root.key):
         replace(root.rightchild, search_key, replacement_word)
-    else:
-        return root
+    
+    return root
