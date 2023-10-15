@@ -94,26 +94,30 @@ def insert(root: Node, key: int, word: str) -> Node:
 # Return the root
 def bulkInsert(root: Node, items: List) -> Node:
     #entering with no balancing
-    for [key,word] in items:
-        root = list_insert(root, key, word)
-    root = preorder_AVL(root)
-    return root
-
-def preorder_AVL(root: Node) -> Node:
-    root = insert(root, root.key, root.word)
-    root.leftchild = preorder_AVL(root.leftchild)
-    root.rightchild = preorder_AVL(root.rightchild)
+    for key,word in items:
+        root = bst_insert(root, key, word)
     
-    return root
+    return preorder_AVL(root)
 
-def list_insert(root: Node, key: int, word: str) -> Node:
+def bst_insert(root: Node, key: int, word: str) -> Node:
     if(root is None):
         root = Node(key, word, None, None)
     if(key < root.key):
-        root.leftchild = list_insert(root.leftchild, key, word)
+        root.leftchild = bst_insert(root.leftchild, key, word)
     elif(key > root.key):
-        root.rightchild = list_insert(root.rightchild, key, word)
+        root.rightchild = bst_insert(root.rightchild, key, word)
     return root
+
+def preorder_AVL(root: Node) -> Node:
+    if root is None: 
+        return None
+    new_root = None
+    new_root = insert(new_root, root.key, root.word)
+    new_root.leftchild = preorder_AVL(root.leftchild)
+    new_root.rightchild = preorder_AVL(root.rightchild)
+    
+    return new_root
+
 
 # bulkDelete
 # The parameter keys should be a list of keys.
@@ -122,8 +126,23 @@ def list_insert(root: Node, key: int, word: str) -> Node:
 # and use this traversal to build a new tree using AVL insertion.
 # Return the root.
 def bulkDelete(root: Node, keys: List[int]) -> Node:
-    # Fill in.
-    return root
+    
+    return preorder_AVL_delete(root, keys)
+
+
+def preorder_AVL_delete(root: Node, keys: List[int]) -> Node:
+    if root is None: 
+        return None
+    
+    if root.key in keys:
+        return None
+    
+    new_root = None
+    new_root = insert(new_root, root.key, root.word)
+    new_root.leftchild = preorder_AVL(root.leftchild)
+    new_root.rightchild = preorder_AVL(root.rightchild)
+    
+    return new_root
 
 # search
 # For the tree rooted at root, calculate the list of keys on the path from the root to the search_key,
