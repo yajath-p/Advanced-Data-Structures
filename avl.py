@@ -111,6 +111,7 @@ def bst_insert(root: Node, key: int, word: str) -> Node:
 def preorder_AVL(root: Node) -> Node:
     if root is None: 
         return None
+    
     new_root = None
     new_root = insert(new_root, root.key, root.word)
     new_root.leftchild = preorder_AVL(root.leftchild)
@@ -126,21 +127,17 @@ def preorder_AVL(root: Node) -> Node:
 # and use this traversal to build a new tree using AVL insertion.
 # Return the root.
 def bulkDelete(root: Node, keys: List[int]) -> Node:
-    
-    return preorder_AVL_delete(root, keys)
+    def preorder_insert(node, keys_to_delete, new_root):
+        if node is None:
+            return new_root
+        if node.key not in keys_to_delete:
+            new_root = insert(new_root, node.key, node.word)
+        new_root = preorder_insert(node.leftchild, keys_to_delete, new_root)
+        new_root = preorder_insert(node.rightchild, keys_to_delete, new_root)
+        return new_root
 
-
-def preorder_AVL_delete(root: Node, keys: List[int]) -> Node:
-    if root is None: 
-        return None
-    
-    if root.key in keys:
-        return None
-    
     new_root = None
-    new_root = insert(new_root, root.key, root.word)
-    new_root.leftchild = preorder_AVL(root.leftchild)
-    new_root.rightchild = preorder_AVL(root.rightchild)
+    new_root = preorder_insert(root, keys, new_root)
     
     return new_root
 
