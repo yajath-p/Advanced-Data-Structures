@@ -93,12 +93,29 @@ def insert(root: Node, key: int, word: str) -> Node:
 # Then do a preorder traversal of the [key,word] pairs and use this traversal to build a new tree using AVL insertion.
 # Return the root
 def bulkInsert(root: Node, items: List) -> Node:
-    #entering with no balancing
-    for key,word in items:
-        root = bst_insert(root, key, word)
-    
-    return preorder_AVL(root)
+    new_root = None
+    for [key, word] in items:
+        root = bst_insert(root, int(key), word)
+    new_root = rebuild_avl_tree(root)
+    return new_root
 
+def rebuild_avl_tree(root: Node) -> Node:
+    if root is None:
+        return None
+    nodes = []
+    preorder_traversal(root, nodes)
+    new_root = None
+    for key, word in nodes:
+        new_root = insert(new_root, key, word)
+    return new_root
+
+def preorder_traversal(root: Node, nodes: List) -> None:
+    if root is None:
+        return
+    nodes.append([root.key, root.word])
+    preorder_traversal(root.leftchild, nodes)
+    preorder_traversal(root.rightchild, nodes)
+    
 def bst_insert(root: Node, key: int, word: str) -> Node:
     if(root is None):
         root = Node(key, word, None, None)
@@ -108,16 +125,7 @@ def bst_insert(root: Node, key: int, word: str) -> Node:
         root.rightchild = bst_insert(root.rightchild, key, word)
     return root
 
-def preorder_AVL(root: Node) -> Node:
-    if root is None: 
-        return None
-    
-    new_root = None
-    new_root = insert(new_root, root.key, root.word)
-    new_root.leftchild = preorder_AVL(root.leftchild)
-    new_root.rightchild = preorder_AVL(root.rightchild)
-    
-    return new_root
+
 
 
 # bulkDelete
@@ -127,7 +135,12 @@ def preorder_AVL(root: Node) -> Node:
 # and use this traversal to build a new tree using AVL insertion.
 # Return the root.
 def bulkDelete(root: Node, keys: List[int]) -> Node:
-    def preorder_insert(node, keys_to_delete, new_root):
+    new_root = None
+    new_root = preorder_insert(root, keys, new_root)
+    
+    return new_root
+
+def preorder_insert(node, keys_to_delete, new_root):
         if node is None:
             return new_root
         if node.key not in keys_to_delete:
@@ -135,12 +148,6 @@ def bulkDelete(root: Node, keys: List[int]) -> Node:
         new_root = preorder_insert(node.leftchild, keys_to_delete, new_root)
         new_root = preorder_insert(node.rightchild, keys_to_delete, new_root)
         return new_root
-
-    new_root = None
-    new_root = preorder_insert(root, keys, new_root)
-    
-    return new_root
-
 # search
 # For the tree rooted at root, calculate the list of keys on the path from the root to the search_key,
 # including the search key, and the word associated with the search_key.
