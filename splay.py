@@ -42,35 +42,46 @@ class SplayTree():
             dict_repr = _to_dict(self.root)
         return json.dumps(dict_repr,indent = 2)
 
-    def right_rotate(self, root:Node) -> Node:
-        left_child = root.leftchild
-        tree = left_child.rightchild
-        
-        left_child.rightchild = root
-        root.leftchild = tree
-        
-        if tree:
-            tree.parent = root
-        left_child.parent = root.parent
-        root.parent = left_child
-        
-        return left_child
 
-    def left_rotate(self, root:Node) -> Node:
+    def left_rotate(self, root:Node):
         right_child = root.rightchild
-        tree = right_child.leftchild
+        root.rightchild = right_child.leftchild
         
-        right_child.leftchild = root
-        root.rightchild = tree
-        
-        if tree:
-            tree.parent = root
+        if right_child.leftchild:
+            right_child.leftchild.parent = root
+            
         right_child.parent = root.parent
-        root.parent = right_child
         
-        return right_child
+        if root.parent is None:
+            self.root = right_child
+        elif root == root.parent.leftchild:
+            root.parent.leftchild = right_child
+        else:
+            root.parent.rightchild = right_child
+            
+        right_child.leftchild = root
+        root.parent = right_child
 
-    def splay(self, key):
+    def right_rotate(self, root:Node):
+        left_child = root.leftchild
+        root.leftchild = left_child.rightchild
+        
+        if left_child.rightchild:
+            left_child.rightchild.parent = root
+            
+        left_child.parent = root.parent
+        
+        if root.parent is None:
+            self.root = left_child
+        elif root == root.parent.leftchild:
+            root.parent.leftchild = left_child
+        else:
+            root.parent.rightchild = left_child
+            
+        left_child.rightchild = root
+        root.parent = left_child
+   
+    def splay(self, key:int):
         fallout = None
         current = self.root
 
@@ -117,61 +128,59 @@ class SplayTree():
 
     # Search
     def search(self,key:int):
-        self.splay(self, key)
+        self.splay(key)
 
     # Insert Method 1
     def insert(self,key:int):
-        new = Node(key, None, None)
-        
         if self.root is None:
-            self.root = new
+            self.root = Node(key)
             return
         
-        self.splay(self, key)
-  
-        if key > self.root.key:
-            new.rightchild = self.root.rightchild
-            if self.root.rightchild:
-                self.root.rightchild.parent = new
+        self.splay(key)
+
+        node_to_add = Node(key)
+        
+        if key < self.root.key:
+            node_to_add.rightchild = self.root
+            node_to_add.leftchild = self.root.leftchild
             
-            new.leftchild = self.root
-            self.root.parent = new
-            
-            self.root.leftchild.rightchild = None
-        elif key < self.root.key:
-            new.leftchild = self.root.leftchild
             if self.root.leftchild:
-                self.root.leftchild.parent = new
+                self.root.leftchild.parent = node_to_add
+                
+            self.root.leftchild = None
+        else:
+            node_to_add.leftchild = self.root
+            node_to_add.rightchild = self.root.rightchild
             
-            new.rightchild = self.root
-            self.root.parent = new
+            if self.root.rightchild:
+                self.root.rightchild.parent = node_to_add
+                
+            self.root.rightchild = None
             
-            self.root.rightchild.leftchild = None
-            
-        self.root = new
-        self.root.parent = None
+        self.root.parent = node_to_add
+        self.root = node_to_add
 
             
 
     # Delete Method 1
     def delete(self,key:int):
-        self.splay(self, key)
+        self.splay(key)
         #both children
         if self.root.leftchild is not None and self.root.rightchild is not None:
-            new_root = self.root.leftchild
+            left_subtree = self.root.leftchild
+            self.root = self.root.rightchild
             self.splay(key)
-            self.root.rightchild = new_root
-            new_root.parent = self.root
             self.root.parent = None
+            self.root.leftchild = left_subtree
+            left_subtree.parent = self.root
+        
         #left child only    
         elif self.root.leftchild is not None and self.root.rightchild is None:
             self.root = self.root.leftchild
-            if self.root.leftchild:
-                self.root.leftchild.parent = None
+            self.root.parent = None
         #right child only
         elif self.root.leftchild is None and self.root.rightchild is not None:
             self.root = self.root.rightchild
-            if self.root.rightchild:
-                self.root.rightchild.parent = None
+            self.root.parent = None
         else: #no children
             self.root = None
