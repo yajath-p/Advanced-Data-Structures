@@ -1,0 +1,12 @@
+initialize,2,4
+insert,MST,0,6
+insert,XBV,2,9
+delete,0,6
+insert,FMM,17,15
+insert,LGR,14,2
+insert,COG,18,12
+insert,BCM,1,16
+insert,HGT,10,4
+insert,DFF,9,5
+insert,LEG,4,14
+knn,1,3,2
